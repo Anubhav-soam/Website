@@ -372,6 +372,28 @@
 
 <!-- =============== DCF TAB =============== -->
 <div id="dcf-tab" class="tab-content">
+  <div class="dcf-terminal">
+    <div class="ticker-bar">
+      <span class="ticker-label">⬡ DCF Terminal</span>
+      <input id="dcfTicker" class="ticker-input" placeholder="Ticker e.g. RELIANCE.NS · AAPL · TCS.NS" />
+      <button id="fetchDataBtn" class="fetch-btn" type="button">Fetch Data</button>
+      <span id="fetchStatus"></span>
+    </div>
+
+    <div class="header-card">
+      <div>
+        <div class="co-name" id="coName">— Enter ticker above & hit FETCH DATA —</div>
+        <div class="co-sub" id="coSub">DCF VALUATION MODEL</div>
+      </div>
+      <div id="kpiGrid" class="kpi-grid"></div>
+    </div>
+
+    <div class="tabs" id="dcfInnerTabs"></div>
+
+    <div id="dcfContent"></div>
+
+    <div class="note">Analytical tool only. Please verify with latest filings and market data.</div>
+  </div>
 <div id="dcf">
   <div class="dcf-header">
     <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
