@@ -16,248 +16,182 @@ themeToggle.addEventListener('click', () => {
 });
 
 function showTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach((t) => t.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach((a) => a.classList.remove('active'));
   document.getElementById(tab).classList.add('active');
   document.getElementById('nav-' + tab)?.classList.add('active');
   window.scrollTo(0, 0);
 }
 
-// Fix nav IDs
-document.getElementById('nav-portfolio').setAttribute('id','nav-portfolio');
+const fmt = (n, d = 1) => (isNaN(n) || n == null ? '—' : n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }));
+const fmtB = (n, sym = '$') => {
+  const a = Math.abs(n), s = n < 0 ? '-' : '';
+  if (a >= 1e12) return `${s}${sym}${fmt(a / 1e12, 2)}T`;
+  if (a >= 1e9) return `${s}${sym}${fmt(a / 1e9, 1)}B`;
+  if (a >= 1e6) return `${s}${sym}${fmt(a / 1e6, 0)}M`;
+  return `${s}${sym}${fmt(a, 0)}`;
+};
+const fmtP = (n) => `${fmt(n, 1)}%`;
 
-function fmt(n) {
-  if (Math.abs(n) >= 1000) return '₹' + (n/1000).toFixed(1) + 'K Cr';
-  return '₹' + n.toFixed(1) + ' Cr';
+const DEFAULTS = {
+  companyName: '', ticker: '', currency: 'USD', sym: '$',
+  revenue: 50000, ebitdaMargin: 25, daPercent: 4, taxRate: 21, capexPercent: 5, nwcPercent: 2,
+  revenueGrowth: [10, 9, 8, 7, 6],
+  wacc: 10, terminalGrowth: 3, evEbitdaMultiple: 15, terminalMethod: 'gordon',
+  netDebt: 10000, sharesOut: 1000, currentPrice: 120,
+};
+
+let inp = { ...DEFAULTS };
+let ticker = 'RELIANCE.NS';
+let tab = 'inputs';
+const TABS = ['inputs', 'projections', 'valuation', 'sensitivity'];
+
+function calcDCF(data) {
+  let rev = data.revenue;
+  const proj = [1, 2, 3, 4, 5].map((y, i) => {
+    rev *= 1 + data.revenueGrowth[i] / 100;
+    const ebitda = rev * (data.ebitdaMargin / 100);
+    const da = rev * (data.daPercent / 100);
+    const ebit = ebitda - da;
+    const nopat = ebit * (1 - data.taxRate / 100);
+    const capex = rev * (data.capexPercent / 100);
+    const nwc = rev * (data.nwcPercent / 100);
+    const fcf = nopat + da - capex - nwc;
+    const df = 1 / Math.pow(1 + data.wacc / 100, y);
+    return { year: 2024 + y, rev, ebitda, da, ebit, nopat, capex, nwc, fcf, df, pvFCF: fcf * df };
+  });
+
+  const pvFCFSum = proj.reduce((s, p) => s + p.pvFCF, 0);
+  const lastFCF = proj[4].fcf;
+  const lastEBITDA = proj[4].ebitda;
+  const tv = data.terminalMethod === 'gordon'
+    ? (lastFCF * (1 + data.terminalGrowth / 100)) / ((data.wacc - data.terminalGrowth) / 100)
+    : lastEBITDA * data.evEbitdaMultiple;
+  const pvTV = tv / Math.pow(1 + data.wacc / 100, 5);
+  const ev = pvFCFSum + pvTV;
+  const eqV = ev - data.netDebt;
+  const impliedPrice = eqV / data.sharesOut;
+  const tvPct = (pvTV / ev) * 100;
+  const upside = data.currentPrice > 0 ? ((impliedPrice / data.currentPrice) - 1) * 100 : null;
+
+  const sensRows = [-2, -1, 0, 1, 2].map((d) => data.wacc + d);
+  const sensCols = [-1, -0.5, 0, 0.5, 1].map((d) => data.terminalGrowth + d);
+  const sensitivity = sensRows.map((w) => sensCols.map((tg) => {
+    const tvS = data.terminalMethod === 'gordon'
+      ? (lastFCF * (1 + tg / 100)) / ((w - tg) / 100)
+      : lastEBITDA * data.evEbitdaMultiple;
+    return (pvFCFSum + tvS / Math.pow(1 + w / 100, 5) - data.netDebt) / data.sharesOut;
+  }));
+
+  return { proj, pvFCFSum, pvTV, tv, ev, eqV, impliedPrice, tvPct, upside, sensitivity, sensRows, sensCols };
 }
 
-function fmtP(n) { return n.toFixed(1) + '%'; }
-
-function runDCF() {
-  // Inputs
-  const company   = document.getElementById('companyName').value || 'Company';
-  const stockP    = parseFloat(document.getElementById('stockPrice').value);
-  const shares    = parseFloat(document.getElementById('shares').value);
-  const netDebt   = parseFloat(document.getElementById('netDebt').value);
-  const rev0      = parseFloat(document.getElementById('revenue').value);
-  const ebitdaMgn = parseFloat(document.getElementById('ebitdaMargin').value)/100;
-  const tax       = parseFloat(document.getElementById('taxRate').value)/100;
-  const capexPct  = parseFloat(document.getElementById('capex').value)/100;
-  const gHigh     = parseFloat(document.getElementById('growthHigh').value)/100;
-  const gLow      = parseFloat(document.getElementById('growthLow').value)/100;
-  const tgr       = parseFloat(document.getElementById('tgr').value)/100;
-  const wacc      = parseFloat(document.getElementById('wacc').value)/100;
-  const evEbitdaM = parseFloat(document.getElementById('evEbitda').value);
-  const peM       = parseFloat(document.getElementById('pe').value);
-  const eps       = parseFloat(document.getElementById('eps').value);
-
-  // Build projection rows
-  let rows = [];
-  let rev = rev0;
-  let totalPV = 0;
-
-  for (let yr = 1; yr <= 10; yr++) {
-    const g = yr <= 5 ? gHigh : gLow;
-    rev = rev * (1 + g);
-    const ebitda = rev * ebitdaMgn;
-    const nopat  = ebitda * (1 - tax);
-    const capexA = rev * capexPct;
-    const fcf    = nopat - capexA;
-    const df     = Math.pow(1 + wacc, yr);
-    const pvFcf  = fcf / df;
-    totalPV += pvFcf;
-    rows.push({ yr, rev, ebitda, fcf, pvFcf });
-  }
-
-  // Terminal value
-  const lastFCF = rows[9].fcf;
-  const tv      = lastFCF * (1 + tgr) / (wacc - tgr);
-  const pvTV    = tv / Math.pow(1 + wacc, 10);
-  const enterpriseValue = totalPV + pvTV;
-  const equityValue     = enterpriseValue - netDebt;
-  const intrinsic       = equityValue / shares;
-  const upside          = ((intrinsic - stockP) / stockP) * 100;
-
-  // EV/EBITDA & P/E
-  const ebitdaY5  = rows[4].ebitda;
-  const evByEbitda= ebitdaY5 * evEbitdaM;
-  const eqEV      = (evByEbitda - netDebt) / shares;
-  const peVal     = eps * peM;
-
-  // Render
-  const container = document.getElementById('dcfResults');
-  container.innerHTML = `
-    <div class="result-card">
-      <div class="result-card-title">Valuation Summary — ${company}</div>
-      <div class="valuation-summary">
-        <div class="val-metric">
-          <div class="val-metric-label">DCF Intrinsic Value</div>
-          <div class="val-metric-value">₹${intrinsic.toFixed(0)}</div>
-        </div>
-        <div class="val-metric">
-          <div class="val-metric-label">Current Price</div>
-          <div class="val-metric-value" style="color:var(--text);">₹${stockP.toFixed(0)}</div>
-        </div>
-        <div class="val-metric">
-          <div class="val-metric-label">Upside / Downside</div>
-          <div class="val-metric-value ${upside>=0?'positive':'negative'}">${upside>=0?'+':''}${upside.toFixed(1)}%</div>
-        </div>
-        <div class="val-metric">
-          <div class="val-metric-label">Enterprise Value</div>
-          <div class="val-metric-value" style="font-size:1.1rem;">${fmt(enterpriseValue)}</div>
-        </div>
-        <div class="val-metric">
-          <div class="val-metric-label">EV/EBITDA Value</div>
-          <div class="val-metric-value" style="font-size:1.1rem;">₹${eqEV.toFixed(0)}</div>
-        </div>
-        <div class="val-metric">
-          <div class="val-metric-label">P/E Value</div>
-          <div class="val-metric-value" style="font-size:1.1rem;">₹${peVal.toFixed(0)}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="result-card">
-      <div class="result-card-title">10-Year Free Cash Flow Projection</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Revenue (₹Cr)</th>
-            <th>EBITDA (₹Cr)</th>
-            <th>FCF (₹Cr)</th>
-            <th>PV of FCF (₹Cr)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r=>`
-            <tr ${r.yr===5||r.yr===10?'class="highlight"':''}>
-              <td>Year ${r.yr}</td>
-              <td>${r.rev.toFixed(0)}</td>
-              <td>${r.ebitda.toFixed(0)}</td>
-              <td>${r.fcf.toFixed(0)}</td>
-              <td>${r.pvFcf.toFixed(0)}</td>
-            </tr>
-          `).join('')}
-          <tr class="highlight">
-            <td>Terminal Value</td>
-            <td>—</td>
-            <td>—</td>
-            <td>${tv.toFixed(0)}</td>
-            <td>${pvTV.toFixed(0)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="result-card">
-      <div class="result-card-title">Football Field Analysis</div>
-      <div class="football-field" id="ffChart">
-        ${buildFootballField(intrinsic, eqEV, peVal, stockP)}
-      </div>
-    </div>
-
-    <div class="result-card">
-      <div class="result-card-title">Sensitivity Analysis — Intrinsic Value (₹) vs WACC & Terminal Growth</div>
-      ${buildHeatmap(rev0, ebitdaMgn, tax, capexPct, gHigh, gLow, netDebt, shares, wacc, tgr, stockP)}
-    </div>
-  `;
+function demoDataForTicker(t) {
+  const u = t.toUpperCase();
+  if (u.includes('AAPL')) return { companyName: 'Apple Inc.', ticker: 'AAPL', currency: 'USD', sym: '$', revenue: 383000, ebitdaMargin: 33, netDebt: 60000, sharesOut: 15500, currentPrice: 210 };
+  if (u.includes('MSFT')) return { companyName: 'Microsoft Corp.', ticker: 'MSFT', currency: 'USD', sym: '$', revenue: 245000, ebitdaMargin: 46, netDebt: 35000, sharesOut: 7450, currentPrice: 430 };
+  if (u.includes('RELIANCE')) return { companyName: 'Reliance Industries', ticker: 'RELIANCE.NS', currency: 'INR', sym: '₹', revenue: 1000000, ebitdaMargin: 16, netDebt: 285000, sharesOut: 6760, currentPrice: 2900, wacc: 12, terminalGrowth: 4 };
+  return { companyName: t.toUpperCase(), ticker: t.toUpperCase(), currency: 'USD', sym: '$', revenue: 50000, ebitdaMargin: 25, netDebt: 10000, sharesOut: 1000, currentPrice: 120 };
 }
 
-function buildFootballField(dcf, ev, pe, current) {
-  const values = [dcf, ev, pe, current];
-  const max = Math.max(...values) * 1.2;
-
-  const pct = v => Math.min((v/max)*100, 100);
-
-  return `
-    <div style="margin-bottom:1rem;font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace;">
-      All values in ₹ per share &nbsp;|&nbsp; ●Current Price: ₹${current.toFixed(0)}
-    </div>
-    <div class="ff-row">
-      <div class="ff-label">DCF Value</div>
-      <div class="ff-bar-container">
-        <div class="ff-bar dcf-bar" style="width:${pct(dcf)}%">₹${dcf.toFixed(0)}</div>
-      </div>
-    </div>
-    <div class="ff-row">
-      <div class="ff-label">EV/EBITDA</div>
-      <div class="ff-bar-container">
-        <div class="ff-bar ev-bar" style="width:${pct(ev)}%">₹${ev.toFixed(0)}</div>
-      </div>
-    </div>
-    <div class="ff-row">
-      <div class="ff-label">P/E Multiple</div>
-      <div class="ff-bar-container">
-        <div class="ff-bar pe-bar" style="width:${pct(pe)}%">₹${pe.toFixed(0)}</div>
-      </div>
-    </div>
-    <div class="ff-row">
-      <div class="ff-label">Current Price</div>
-      <div class="ff-bar-container">
-        <div class="ff-bar" style="width:${pct(current)}%;background:var(--border);color:var(--text);">₹${current.toFixed(0)}</div>
-      </div>
-    </div>
-  `;
+function renderKpis(dcf) {
+  const grid = document.getElementById('kpiGrid');
+  const sym = inp.sym;
+  const list = [
+    { label: 'Enterprise Value', val: fmtB(dcf.ev * 1e6, sym), cls: '' },
+    { label: 'Equity Value', val: fmtB(dcf.eqV * 1e6, sym), cls: 'white' },
+    { label: 'Implied Price', val: `${sym}${fmt(dcf.impliedPrice, 2)}`, cls: '' },
+  ];
+  if (dcf.upside !== null) list.push({ label: 'Upside/(Downside)', val: `${dcf.upside >= 0 ? '+' : ''}${fmt(dcf.upside, 1)}%`, cls: dcf.upside >= 0 ? 'green' : 'red' });
+  grid.innerHTML = list.map((k) => `<div class="kpi-item"><div class="kpi-label">${k.label}</div><div class="kpi-value ${k.cls}">${k.val}</div></div>`).join('');
 }
 
-function buildHeatmap(rev0, ebitdaMgn, tax, capexPct, gHigh, gLow, netDebt, shares, baseWacc, baseTgr, stockP) {
-  const waccRange = [-0.02, -0.01, 0, 0.01, 0.02];
-  const tgrRange  = [-0.01, -0.005, 0, 0.005, 0.01];
-
-  function calcIntrinsic(w, t) {
-    let rev = rev0;
-    let totalPV = 0;
-    for (let yr = 1; yr <= 10; yr++) {
-      const g = yr <= 5 ? gHigh : gLow;
-      rev = rev * (1 + g);
-      const fcf = rev * ebitdaMgn * (1-tax) - rev * capexPct;
-      const pvFcf = fcf / Math.pow(1+w, yr);
-      totalPV += pvFcf;
-    }
-    const lastFCF = rev * ebitdaMgn * (1-tax) - rev * capexPct;
-    const tv = lastFCF * (1+t) / (w - t);
-    const pvTV = tv / Math.pow(1+w, 10);
-    return (totalPV + pvTV - netDebt) / shares;
-  }
-
-  const cells = [];
-  for (let i = 0; i < tgrRange.length; i++) {
-    for (let j = 0; j < waccRange.length; j++) {
-      cells.push(calcIntrinsic(baseWacc + waccRange[j], baseTgr + tgrRange[i]));
-    }
-  }
-
-  const minV = Math.min(...cells), maxV = Math.max(...cells);
-
-  function cellColor(v) {
-    const pct = (v - minV) / (maxV - minV);
-    if (pct > 0.7) return `hsl(160,60%,${25+pct*20}%)`;
-    if (pct > 0.4) return `hsl(45,70%,${30+pct*15}%)`;
-    return `hsl(0,55%,${25+pct*20}%)`;
-  }
-
-  let html = `
-    <div class="sensitivity-label">Rows: Terminal Growth Rate &nbsp;|&nbsp; Columns: WACC (base ± delta)</div>
-    <div class="heatmap-grid">
-      <div class="hm-header">TGR \\ WACC</div>
-      ${waccRange.map(w=>`<div class="hm-header">${((baseWacc+w)*100).toFixed(1)}%</div>`).join('')}
-  `;
-
-  for (let i = 0; i < tgrRange.length; i++) {
-    html += `<div class="hm-row-label">${((baseTgr+tgrRange[i])*100).toFixed(1)}%</div>`;
-    for (let j = 0; j < waccRange.length; j++) {
-      const v = cells[i*5+j];
-      const isBase = (waccRange[j]===0 && tgrRange[i]===0);
-      html += `<div class="hm-cell" style="background:${cellColor(v)};${isBase?'outline:2px solid var(--accent);':''}">${v.toFixed(0)}</div>`;
-    }
-  }
-
-  html += `</div>
-    <div style="margin-top:1rem;font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace;">
-      Green = Higher intrinsic value &nbsp;|&nbsp; Red = Lower intrinsic value &nbsp;|&nbsp; Outlined cell = Base case
-    </div>
-  `;
-
-  return html;
+function renderTabs() {
+  const c = document.getElementById('dcfInnerTabs');
+  c.innerHTML = TABS.map((t) => `<button class="tab${tab === t ? ' active' : ''}" data-tab="${t}">${t}</button>`).join('');
+  c.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.tab; renderDCF(); }));
 }
+
+function inputsView() {
+  const sym = inp.sym;
+  const rows = [
+    ['Company Name', 'companyName', 'text'], ['Ticker', 'ticker', 'text'], [`Revenue (${sym}M)`, 'revenue', 'number'],
+    [`Net Debt (${sym}M)`, 'netDebt', 'number'], ['Shares Out (M)', 'sharesOut', 'number'], [`Current Price (${sym})`, 'currentPrice', 'number'],
+    ['EBITDA Margin (%)', 'ebitdaMargin', 'number'], ['D&A (% Revenue)', 'daPercent', 'number'], ['Tax Rate (%)', 'taxRate', 'number'],
+    ['CapEx (% Revenue)', 'capexPercent', 'number'], ['NWC Change (% Revenue)', 'nwcPercent', 'number'], ['WACC (%)', 'wacc', 'number'],
+    ['Terminal Growth (%)', 'terminalGrowth', 'number'], ['EV/EBITDA Multiple', 'evEbitdaMultiple', 'number']
+  ];
+
+  const growth = [1, 2, 3, 4, 5].map((y, i) => `<div class="inp-row"><span class="inp-label">Year ${y} Growth (%)</span><input data-growth="${i}" class="inp-field" type="number" value="${inp.revenueGrowth[i]}"></div>`).join('');
+
+  return `<div class="card"><div class="card-title">Inputs</div>${rows.map(([l,k,t])=>`<div class="inp-row"><span class="inp-label">${l}</span><input data-key="${k}" class="inp-field ${t==='text'?'tl':''}" type="${t}" value="${inp[k]}"></div>`).join('')}<div class="card-title" style="margin-top:12px;">Revenue Growth by Year</div>${growth}</div>`;
+}
+
+function projectionsView(dcf) {
+  return `<div class="card"><div class="card-title">5-Year Free Cash Flow Projections (${inp.sym}M)</div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Metric</th>${dcf.proj.map(p=>`<th>${p.year}</th>`).join('')}</tr></thead><tbody>${[
+    ['Revenue','rev'],['EBITDA','ebitda'],['D&A','da'],['EBIT','ebit'],['NOPAT','nopat'],['CapEx','capex'],['NWC Change','nwc'],['Free Cash Flow','fcf'],['Discount Factor','df'],['PV of FCF','pvFCF']
+  ].map(r=>`<tr><td>${r[0]}</td>${dcf.proj.map(p=>`<td>${r[1]==='df'?fmt(p[r[1]],4):fmtB(p[r[1]]*1e6,inp.sym)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function valuationView(dcf) {
+  return `<div class="grid-2"><div class="card"><div class="card-title">Valuation Bridge</div>
+  <div class="val-row"><span class="vl">PV of FCFs (Years 1–5)</span><span>${fmtB(dcf.pvFCFSum*1e6,inp.sym)}</span></div>
+  <div class="val-row"><span class="vl">PV of Terminal Value</span><span>${fmtB(dcf.pvTV*1e6,inp.sym)}</span></div>
+  <div class="val-row val-total"><span class="vl">Enterprise Value</span><span>${fmtB(dcf.ev*1e6,inp.sym)}</span></div>
+  <div class="val-row"><span class="vl">Less: Net Debt</span><span>(${fmtB(inp.netDebt*1e6,inp.sym)})</span></div>
+  <div class="val-row val-total"><span class="vl">Equity Value</span><span>${fmtB(dcf.eqV*1e6,inp.sym)}</span></div>
+  <div class="val-row"><span class="vl">Implied Share Price</span><span>${inp.sym}${fmt(dcf.impliedPrice,2)}</span></div>
+  </div><div class="card"><div class="card-title">Key Metrics</div><div class="metric-grid">
+  <div class="metric-card"><div class="ml">WACC</div><div class="mv">${fmtP(inp.wacc)}</div></div>
+  <div class="metric-card"><div class="ml">Terminal Growth</div><div class="mv">${fmtP(inp.terminalGrowth)}</div></div>
+  <div class="metric-card"><div class="ml">Terminal Value</div><div class="mv">${fmtB(dcf.tv*1e6,inp.sym)}</div></div>
+  <div class="metric-card"><div class="ml">TV % of EV</div><div class="mv">${fmtP(dcf.tvPct)}</div></div>
+  </div></div></div>`;
+}
+
+function sensitivityView(dcf) {
+  const all = dcf.sensitivity.flat(); const mn = Math.min(...all), mx = Math.max(...all);
+  return `<div class="card"><div class="card-title">Sensitivity · Implied Share Price (${inp.sym})</div><div style="overflow-x:auto"><table class="sens-table"><thead><tr><th>WACC \\ TGR</th>${dcf.sensCols.map(c=>`<th>${fmtP(c)}</th>`).join('')}</tr></thead><tbody>${dcf.sensitivity.map((row,ri)=>`<tr><th>${fmtP(dcf.sensRows[ri])}</th>${row.map((v,ci)=>{const t=(v-mn)/(mx-mn||1);const isBase=ri===2&&ci===2;const bg=isBase?'':'rgba('+ (t>0.5?'16,185,129':'239,68,68') +','+(0.15+t*0.25)+')';return `<td class="${isBase?'sens-base':''}" style="background:${bg}">${inp.sym}${fmt(v,2)}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function renderDCF() {
+  const dcf = calcDCF(inp);
+  document.getElementById('coName').innerHTML = `${inp.companyName || '—'} ${inp.ticker ? `<span style="color:var(--muted);font-size:14px">(${inp.ticker})</span>` : ''}`;
+  document.getElementById('coSub').textContent = `${inp.currentPrice ? `CURRENT PRICE: ${inp.sym}${fmt(inp.currentPrice, 2)} · ` : ''}DCF VALUATION MODEL · ${inp.currency} MILLIONS`;
+  renderKpis(dcf);
+  renderTabs();
+
+  const content = document.getElementById('dcfContent');
+  if (tab === 'inputs') content.innerHTML = inputsView();
+  if (tab === 'projections') content.innerHTML = projectionsView(dcf);
+  if (tab === 'valuation') content.innerHTML = valuationView(dcf);
+  if (tab === 'sensitivity') content.innerHTML = sensitivityView(dcf);
+
+  content.querySelectorAll('[data-key]').forEach((el) => {
+    el.addEventListener('input', () => {
+      const k = el.dataset.key;
+      inp[k] = el.type === 'text' ? el.value : (parseFloat(el.value) || 0);
+      renderDCF();
+    });
+  });
+  content.querySelectorAll('[data-growth]').forEach((el) => {
+    el.addEventListener('input', () => {
+      inp.revenueGrowth[Number(el.dataset.growth)] = parseFloat(el.value) || 0;
+      renderDCF();
+    });
+  });
+}
+
+function fetchData() {
+  const t = document.getElementById('dcfTicker').value.trim();
+  if (!t) return;
+  const info = demoDataForTicker(t);
+  inp = { ...inp, ...info, revenueGrowth: [10, 9, 8, 7, 6] };
+  document.getElementById('fetchStatus').className = 'status-ok';
+  document.getElementById('fetchStatus').textContent = `✓ Loaded sample profile for ${info.ticker}`;
+  renderDCF();
+}
+
+document.getElementById('dcfTicker').value = ticker;
+document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+renderDCF();
