@@ -999,6 +999,7 @@
     .theme-toggle { font-size: 0.68rem; padding: 0.35rem 0.7rem; }
     #home { padding: 6rem 1.5rem 3rem; }
     .hero-stats { gap: 1.5rem; }
+    .floating-badge { display: none; }
     section { padding: 4rem 1.5rem; }
     .experience-item { grid-template-columns: 1fr; }
     .contact-grid { grid-template-columns: 1fr; }

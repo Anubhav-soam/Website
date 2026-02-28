@@ -57,6 +57,9 @@
       </div>
     </div>
 
+    <div class="floating-badge fade-in delay-4">
+      <div class="badge-text">CFA<br>Level 1<br>Candidate<br><span style="font-size:0.7rem;color:var(--muted);font-style:normal;">2025 – 2026</span></div>
+    </div>
   </div>
 
   <!-- EXPERIENCE -->
@@ -391,6 +394,116 @@
 
     <div class="note">Analytical tool only. Please verify with latest filings and market data.</div>
   </div>
+<div id="dcf">
+  <div class="dcf-header">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+      <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:0.15em;">TOOL</span>
+      <div style="height:1px;width:50px;background:var(--border);"></div>
+    </div>
+    <h2>Automated DCF Valuation Model</h2>
+    <p>Multi-method valuation · Sensitivity Heatmap · Football Field Analysis · Built by Anubhav Soam</p>
+  </div>
+
+  <div class="dcf-layout">
+    <!-- INPUTS -->
+    <div class="dcf-inputs">
+      <div class="input-section-title">Company Overview</div>
+      <div class="input-row">
+        <label>Company Name</label>
+        <input type="text" id="companyName" value="Sample Corp" placeholder="e.g. Infosys">
+      </div>
+      <div class="input-row">
+        <label>Current Stock Price (₹)</label>
+        <input type="number" id="stockPrice" value="1500" step="10">
+      </div>
+      <div class="input-row">
+        <label>Shares Outstanding (Cr)</label>
+        <input type="number" id="shares" value="100" step="1">
+      </div>
+      <div class="input-row">
+        <label>Net Debt (₹ Cr)</label>
+        <input type="number" id="netDebt" value="500" step="50">
+      </div>
+
+      <div class="input-section-title">Base Financials (Year 0)</div>
+      <div class="input-row">
+        <label>Revenue (₹ Cr)</label>
+        <input type="number" id="revenue" value="5000" step="100">
+      </div>
+      <div class="input-row">
+        <label>EBITDA Margin (%)</label>
+        <input type="number" id="ebitdaMargin" value="22" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>Tax Rate (%)</label>
+        <input type="number" id="taxRate" value="25" step="1">
+      </div>
+      <div class="input-row">
+        <label>Capex % of Revenue</label>
+        <input type="number" id="capex" value="5" step="0.5">
+      </div>
+
+      <div class="input-section-title">Growth & Discount Assumptions</div>
+      <div class="input-row">
+        <label>Revenue Growth Yr 1–5 (%)</label>
+        <div class="range-container">
+          <input type="range" id="growthHigh" min="1" max="40" value="15" oninput="document.getElementById('growthHighVal').textContent=this.value+'%'">
+          <span class="range-val" id="growthHighVal">15%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>Revenue Growth Yr 6–10 (%)</label>
+        <div class="range-container">
+          <input type="range" id="growthLow" min="1" max="30" value="8" oninput="document.getElementById('growthLowVal').textContent=this.value+'%'">
+          <span class="range-val" id="growthLowVal">8%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>Terminal Growth Rate (%)</label>
+        <div class="range-container">
+          <input type="range" id="tgr" min="1" max="8" value="3" step="0.5" oninput="document.getElementById('tgrVal').textContent=this.value+'%'">
+          <span class="range-val" id="tgrVal">3%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>WACC / Discount Rate (%)</label>
+        <div class="range-container">
+          <input type="range" id="wacc" min="6" max="20" value="12" step="0.5" oninput="document.getElementById('waccVal').textContent=this.value+'%'">
+          <span class="range-val" id="waccVal">12%</span>
+        </div>
+      </div>
+
+      <div class="input-section-title">Comparable Multiples</div>
+      <div class="input-row">
+        <label>Sector EV/EBITDA Multiple</label>
+        <input type="number" id="evEbitda" value="12" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>Sector P/E Multiple</label>
+        <input type="number" id="pe" value="20" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>EPS (₹)</label>
+        <input type="number" id="eps" value="65" step="1">
+      </div>
+
+      <button class="run-btn" onclick="runDCF()">▶ Run Valuation</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="dcf-results" id="dcfResults">
+      <div class="dcf-placeholder" id="dcfPlaceholder">
+        <div class="icon">📊</div>
+        <h3>Enter assumptions and run the model</h3>
+        <p style="font-size:0.85rem;margin-top:0.5rem;">Outputs: DCF Intrinsic Value, Football Field Chart, Sensitivity Heatmap</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 Anubhav Soam &nbsp;·&nbsp; DCF Model &nbsp;·&nbsp; Finance meets Technology</p>
+</footer>
 </div><!-- end dcf tab -->
 
 <script src="script.js" defer></script>
