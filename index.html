@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anubhav Soam | Finance & Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #c8a96e;
+    --accent2: #5b8fff;
+    --accent3: #7fffcf;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+    --danger: #ff6b6b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.3s;
+    cursor: pointer;
+  }
+
+  .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+  /* TABS */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* HERO */
+  #home {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(200,169,110,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(91,143,255,0.06) 0%, transparent 50%);
+  }
+
+  .hero-grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+  }
+
+  .hero-name-italic {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--muted);
+    margin: 1.5rem 0 2.5rem;
+    font-weight: 300;
+    max-width: 550px;
+    line-height: 1.6;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin: 2.5rem 0;
+  }
+
+  .stat-item {
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.85rem 2rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+
+  .btn-primary:hover {
+    background: #e8c98e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(200,169,110,0.3);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .floating-badge {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 220px;
+    height: 220px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    background: var(--card);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-52%) translateX(8px); }
+  }
+
+  .badge-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-style: italic;
+    line-height: 1.4;
+    padding: 1rem;
+  }
+
+  /* SECTION STYLES */
+  section {
+    padding: 6rem 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* EXPERIENCE */
+  .experience-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .exp-left {
+    padding-top: 0.3rem;
+  }
+
+  .exp-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .exp-company {
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .exp-location {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  .exp-right h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .exp-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .exp-list li {
+    font-size: 0.9rem;
+    color: #b0b0c8;
+    line-height: 1.6;
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .exp-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.7rem;
+    top: 0.2rem;
+  }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .skill-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.8rem;
+    transition: all 0.3s;
+  }
+
+  .skill-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(200,169,110,0.1);
+  }
+
+  .skill-card-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .skill-tag {
+    background: rgba(200,169,110,0.07);
+    border: 1px solid rgba(200,169,110,0.2);
+    color: var(--text);
+    padding: 0.3rem 0.75rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    transition: all 0.2s;
+  }
+
+  .skill-tag:hover {
+    background: rgba(200,169,110,0.15);
+    color: var(--accent);
+  }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transition: transform 0.4s;
+    transform-origin: left;
+  }
+
+  .project-card:hover::before { transform: scaleX(1); }
+
+  .project-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(200,169,110,0.3);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .project-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .project-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+
+  .project-tag {
+    background: rgba(91,143,255,0.1);
+    border: 1px solid rgba(91,143,255,0.2);
+    color: var(--accent2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    display: inline-block;
+  }
+
+  /* EDUCATION */
+  .education-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .education-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .edu-item {
+    position: relative;
+    padding: 0 0 2.5rem 2.5rem;
+  }
+
+  .edu-item::before {
+    content: '';
+    position: absolute;
+    left: -0.45rem;
+    top: 0.4rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+
+  .edu-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  .edu-degree {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .edu-institution {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .edu-score {
+    display: inline-block;
+    margin-top: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent3);
+    background: rgba(127,255,207,0.07);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+  }
+
+  /* CONTACT */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .contact-item:hover {
+    border-color: var(--accent);
+    transform: translateX(6px);
+  }
+
+  .contact-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: rgba(200,169,110,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .contact-value {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  /* ACHIEVEMENT */
+  .achievement-card {
+    background: linear-gradient(135deg, rgba(200,169,110,0.08), rgba(91,143,255,0.05));
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .achievement-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    color: var(--accent);
+  }
+
+  /* DCF MODEL TAB */
+  #dcf {
+    padding: 7rem 2rem 4rem;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .dcf-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .dcf-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dcf-header p {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .dcf-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 2rem;
+  }
+
+  .dcf-inputs {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+  }
+
+  .input-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .input-section-title:first-child { margin-top: 0; }
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .input-row label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .input-row input, .input-row select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.55rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .input-row input:focus, .input-row select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .run-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s;
+  }
+
+  .run-btn:hover {
+    background: #e8c98e;
+    box-shadow: 0 8px 30px rgba(200,169,110,0.3);
+    transform: translateY(-1px);
+  }
+
+  .dcf-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.8rem;
+  }
+
+  .result-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+
+  .valuation-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .val-metric {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .val-metric-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .val-metric-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+  }
+
+  .val-metric-value.positive { color: var(--accent3); }
+  .val-metric-value.negative { color: var(--danger); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.5rem 0.7rem;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th:first-child { text-align: left; }
+
+  td {
+    padding: 0.6rem 0.7rem;
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(42,42,58,0.5);
+    color: #b0b0c8;
+  }
+
+  td:first-child {
+    text-align: left;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr.highlight td { color: var(--accent); font-weight: 500; }
+
+  .football-field {
+    margin-top: 1rem;
+  }
+
+  .ff-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .ff-label {
+    width: 110px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .ff-bar-container {
+    flex: 1;
+    height: 28px;
+    background: var(--bg);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ff-bar {
+    height: 100%;
+    border-radius: 4px;
+    position: relative;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #0a0a0f;
+    font-weight: 600;
+  }
+
+  .ff-bar.dcf-bar { background: linear-gradient(90deg, var(--accent), #e8c98e); }
+  .ff-bar.ev-bar { background: linear-gradient(90deg, var(--accent2), #8ab0ff); }
+  .ff-bar.pe-bar { background: linear-gradient(90deg, var(--accent3), #a0ffdf); }
+
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: auto repeat(5, 1fr);
+    gap: 3px;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .hm-header {
+    text-align: center;
+    color: var(--muted);
+    padding: 0.3rem;
+    font-size: 0.65rem;
+  }
+
+  .hm-row-label {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.65rem;
+    padding-right: 0.5rem;
+  }
+
+  .hm-cell {
+    padding: 0.5rem 0.3rem;
+    text-align: center;
+    border-radius: 3px;
+    color: #0a0a0f;
+    font-weight: 600;
+    font-size: 0.68rem;
+    transition: all 0.5s;
+  }
+
+  .sensitivity-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .dcf-placeholder {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+  }
+
+  .dcf-placeholder .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .dcf-placeholder h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .range-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .range-container input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    border: none;
+    padding: 0;
+  }
+
+  .range-container input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .range-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    width: 45px;
+    text-align: right;
+  }
+
+  /* CERTIFICATIONS */
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .cert-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .cert-item::before { content: '✦'; color: var(--accent); font-size: 0.6rem; }
+
+  .cert-item:hover { border-color: var(--accent); color: var(--text); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeInUp 0.7s ease forwards; }
+
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.2s; opacity: 0; }
+  .delay-3 { animation-delay: 0.35s; opacity: 0; }
+  .delay-4 { animation-delay: 0.5s; opacity: 0; }
+
+  .tag-cfa {
+    display: inline-block;
+    background: rgba(127,255,207,0.08);
+    border: 1px solid rgba(127,255,207,0.3);
+    color: var(--accent3);
+    padding: 0.25rem 0.8rem;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
+  }
+
+  @media(max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #home { padding: 6rem 1.5rem 3rem; }
+    .hero-stats { gap: 1.5rem; }
+    .floating-badge { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .experience-item { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .dcf-layout { grid-template-columns: 1fr; }
+    .dcf-inputs { position: static; }
+    .valuation-summary { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">AS</div>
+  <ul class="nav-links">
+    <li><a onclick="showTab('portfolio')" class="active" id="nav-portfolio">Portfolio</a></li>
+    <li><a onclick="showTab('dcf-tab')" id="nav-dcf-tab">DCF Model</a></li>
+  </ul>
+</nav>
+
+<!-- =============== PORTFOLIO TAB =============== -->
+<div id="portfolio" class="tab-content active">
+
+  <!-- HERO -->
+  <div id="home" style="min-height:100vh;display:flex;align-items:center;padding:8rem 3rem 4rem;position:relative;overflow:hidden;">
+    <div class="hero-bg"></div>
+    <div class="hero-grid-lines"></div>
+    <div class="hero-content">
+      <div class="hero-tag fade-in delay-1">Finance & Analytics Professional</div>
+      <h1 class="fade-in delay-2">Anubhav<br><span class="hero-name-italic">Soam</span></h1>
+      <p class="hero-subtitle fade-in delay-3">Deputy Manager – Innovation | MBA Finance & Analytics | CFA Level 1 Candidate. Bridging data intelligence and financial strategy to drive measurable outcomes.</p>
+
+      <div class="hero-stats fade-in delay-3">
+        <div class="stat-item">
+          <div class="stat-value">1.7+</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">25+</div>
+          <div class="stat-label">Workflows Automated</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">655+</div>
+          <div class="stat-label">Districts Analyzed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">78%</div>
+          <div class="stat-label">Model Accuracy</div>
+        </div>
+      </div>
+
+      <div class="hero-cta fade-in delay-4">
+        <a href="mailto:soamanubhav@gmail.com" class="btn btn-primary">Get In Touch</a>
+        <a href="https://www.linkedin.com/in/anubhav-soam/" target="_blank" rel="noreferrer noopener" class="btn btn-outline">LinkedIn ↗</a>
+        <button onclick="showTab('dcf-tab')" class="btn btn-outline" style="border-color:var(--accent2);color:var(--accent2);">Try DCF Model ↗</button>
+      </div>
+    </div>
+
+    <div class="floating-badge fade-in delay-4">
+      <div class="badge-text">CFA<br>Level 1<br>Candidate<br><span style="font-size:0.7rem;color:var(--muted);font-style:normal;">2025 – 2026</span></div>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="experience-item">
+      <div class="exp-left">
+        <div class="exp-date">04/2024 – 10/2025</div>
+        <div class="exp-company">Shriram Life Insurance</div>
+        <div class="exp-location">📍 Hyderabad</div>
+      </div>
+      <div class="exp-right">
+        <h3>Deputy Manager – Innovation</h3>
+        <ul class="exp-list">
+          <li>Automated 25+ resource planning workflows using Alteryx, streamlining internal operations and cutting manual effort significantly.</li>
+          <li>Prepared and presented financial reports to facilitate strategic collaboration with partner banks.</li>
+          <li>Spearheaded development of innovative insurance products using Empathy Maps, Market Research, and user CODEX, expanding market reach.</li>
+          <li>Conducted mortality analysis across 655+ districts with actuarial teams to identify high-growth geographies.</li>
+          <li>Led strategic blockchain integration project to automate claims settlement, boosting operational efficiency.</li>
+          <li>Created 8+ targeted value propositions aligned with diverse customer segments, strengthening product-market fit.</li>
+          <li>Designed population heatmaps leveraging district-level demographic data — enabling launch of 40+ new sales venues.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="experience-item">
+      <div class="exp-left">
+        <div class="exp-date">12/2024 – 02/2025</div>
+        <div class="exp-company">Finlatics</div>
+        <div class="exp-location">📍 Remote</div>
+      </div>
+      <div class="exp-right">
+        <h3>Investment Banking – Live Project</h3>
+        <ul class="exp-list">
+          <li>Gained hands-on experience in equity research and investment banking, analyzing 20+ stocks across sectors.</li>
+          <li>Conducted risk assessment and portfolio management for a simulated portfolio worth ₹2L+, optimizing asset allocation.</li>
+          <li>Developed skills in fundamental & technical analysis, valuation techniques, and financial reporting.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="experience-item">
+      <div class="exp-left">
+        <div class="exp-date">04/2023 – 05/2023</div>
+        <div class="exp-company">K-12 Techno Service</div>
+        <div class="exp-location">📍 Pune</div>
+      </div>
+      <div class="exp-right">
+        <h3>Operations Intern</h3>
+        <ul class="exp-list">
+          <li>Ensured high accuracy in financial data validation and streamlined data management.</li>
+          <li>Applied advanced Excel functions to streamline financial reconciliation and reporting.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills" style="background:var(--surface);max-width:100%;padding:5rem 0;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 3rem;">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2 class="section-title">Skills</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-card-title">Technical Tools</div>
+          <div class="skill-tags">
+            <span class="skill-tag">Alteryx</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">R Programming</span>
+            <span class="skill-tag">Power BI</span>
+            <span class="skill-tag">MS Excel</span>
+            <span class="skill-tag">Streamlit</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Finance Skills</div>
+          <div class="skill-tags">
+            <span class="skill-tag">Financial Modelling</span>
+            <span class="skill-tag">DCF Valuation</span>
+            <span class="skill-tag">Equity Research</span>
+            <span class="skill-tag">Fixed Income</span>
+            <span class="skill-tag">Derivatives</span>
+            <span class="skill-tag">Ratio Analysis</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Python Libraries</div>
+          <div class="skill-tags">
+            <span class="skill-tag">pandas</span>
+            <span class="skill-tag">NumPy</span>
+            <span class="skill-tag">Caret</span>
+            <span class="skill-tag">Forecast</span>
+            <span class="skill-tag">Yahoo Finance API</span>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-title">Soft Skills</div>
+          <div class="skill-tags">
+            <span class="skill-tag">Analytical Problem-Solving</span>
+            <span class="skill-tag">Cross-functional Collaboration</span>
+            <span class="skill-tag">Presentation</span>
+            <span class="skill-tag">Market Research</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Projects</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-icon">📊</div>
+        <h3>Financial Modeling & Valuation Tool</h3>
+        <p>Interactive Streamlit dashboard integrating Yahoo Finance APIs, automating DCF valuation and 5–10 year revenue forecasting. Cut manual Excel modeling effort by 70%+.</p>
+        <div>
+          <span class="project-tag">Python</span>
+          <span class="project-tag">Streamlit</span>
+          <span class="project-tag">DCF</span>
+          <span class="project-tag">Yahoo Finance</span>
+        </div>
+        <div style="margin-top:1rem;">
+          <span style="font-size:0.75rem;color:var(--accent);">Advanced sensitivity analysis · Football field charts · EV/EBITDA multiples</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-icon">📈</div>
+        <h3>Ratio Analysis Application</h3>
+        <p>Financial ratio dashboard automating extraction of income statements, balance sheets, and cash flows from public filings. Supports investment evaluation and peer comparison.</p>
+        <div>
+          <span class="project-tag">Python</span>
+          <span class="project-tag">SQL</span>
+          <span class="project-tag">Data Viz</span>
+          <span class="project-tag">Equity Research</span>
+        </div>
+        <div style="margin-top:1rem;">
+          <span style="font-size:0.75rem;color:var(--accent);">Profitability · Liquidity · Leverage · Efficiency · Market ratios</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-icon">🦠</div>
+        <h3>COVID-19 Trend Forecasting</h3>
+        <p>Published in Springer — developed a statistical model with 78% prediction accuracy for infection spread using time-series data analysis.</p>
+        <div>
+          <span class="project-tag">R</span>
+          <span class="project-tag">Time-Series</span>
+          <span class="project-tag">Springer</span>
+        </div>
+        <a href="https://link.springer.com/chapter/10.1007/978-981-16-5685-9_34" target="_blank" rel="noreferrer noopener" style="display:inline-block;margin-top:1rem;font-size:0.75rem;color:var(--accent2);text-decoration:none;">View Publication ↗</a>
+      </div>
+
+      <div class="project-card" style="cursor:pointer;" onclick="showTab('dcf-tab')">
+        <div class="project-icon">🏗️</div>
+        <h3>Live DCF Model</h3>
+        <p>Try the interactive Discounted Cash Flow model embedded in this portfolio — featuring sensitivity heatmaps, football field analysis, and multi-method valuation.</p>
+        <div>
+          <span class="project-tag">DCF</span>
+          <span class="project-tag">Sensitivity</span>
+          <span class="project-tag">Football Field</span>
+        </div>
+        <div style="margin-top:1rem;color:var(--accent);font-size:0.8rem;">Click to launch → </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section id="education" style="background:var(--surface);max-width:100%;padding:5rem 0;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 3rem;">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Education</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;">
+        <div class="education-timeline">
+          <div class="edu-item">
+            <div class="edu-year">2025 – 2026</div>
+            <div class="edu-degree">Chartered Financial Analyst (CFA)</div>
+            <div class="edu-institution">Level 1 Candidate</div>
+            <span class="tag-cfa">In Progress</span>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">2022 – 2024</div>
+            <div class="edu-degree">MBA – Finance & Analytics</div>
+            <div class="edu-institution">NMIMS, Hyderabad</div>
+            <span class="edu-score">Score: 75.00%</span>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">2017 – 2021</div>
+            <div class="edu-degree">B.Tech – Computer Science Engineering</div>
+            <div class="edu-institution">SRM Institute, Chennai</div>
+            <span class="edu-score">Score: 81.94%</span>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">2016 – 2017</div>
+            <div class="edu-degree">XII – CBSE (PCM)</div>
+            <div class="edu-institution">The Shishukunj International School, Indore</div>
+            <span class="edu-score">Score: 82.20%</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1.5rem;color:var(--muted);">Certifications</h3>
+          <div class="cert-grid">
+            <div class="cert-item">Alteryx Designer Core</div>
+            <div class="cert-item">Derivatives – Options & Futures</div>
+            <div class="cert-item">NPTEL – DBMS</div>
+            <div class="cert-item">NPTEL – DSA using Python</div>
+            <div class="cert-item">Financial Modelling</div>
+            <div class="cert-item">Investment Banking Analysis</div>
+            <div class="cert-item">Power BI</div>
+            <div class="cert-item">NISM – SEBI Investors Module</div>
+          </div>
+
+          <div class="achievement-card" style="margin-top:2rem;">
+            <h3>🏆 Research Paper Publication</h3>
+            <p style="font-size:0.85rem;color:#b0b0c8;line-height:1.6;">Published research on COVID-19 trend forecasting in Springer. Developed a statistical model with <strong style="color:var(--accent);">78% prediction accuracy</strong> for infection spread using time-series data analysis.</p>
+            <a href="https://link.springer.com/chapter/10.1007/978-981-16-5685-9_34" target="_blank" rel="noreferrer noopener" style="display:inline-block;margin-top:1rem;font-size:0.78rem;color:var(--accent2);text-decoration:none;">springer.com ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Contact</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <p style="color:var(--muted);font-size:0.95rem;line-height:1.8;margin-bottom:2rem;">Open to opportunities in financial analysis, investment banking, data analytics, and product innovation. Let's connect and explore what's possible.</p>
+        <div class="contact-info">
+          <a href="mailto:soamanubhav@gmail.com" class="contact-item">
+            <div class="contact-icon">✉️</div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-value">soamanubhav@gmail.com</div>
+            </div>
+          </a>
+          <a href="tel:+919755433510" class="contact-item">
+            <div class="contact-icon">📱</div>
+            <div>
+              <div class="contact-label">Phone</div>
+              <div class="contact-value">+91 97554 33510</div>
+            </div>
+          </a>
+          <a href="https://www.linkedin.com/in/anubhav-soam/" target="_blank" rel="noreferrer noopener" class="contact-item">
+            <div class="contact-icon">💼</div>
+            <div>
+              <div class="contact-label">LinkedIn</div>
+              <div class="contact-value">linkedin.com/in/anubhav-soam</div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;">Interests & Beyond</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:1.5rem;">🏊</span>
+            <div>
+              <div style="font-size:0.9rem;">Swimming</div>
+              <div style="font-size:0.75rem;color:var(--muted);">Discipline & endurance</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:1.5rem;">🎮</span>
+            <div>
+              <div style="font-size:0.9rem;">E-Sports</div>
+              <div style="font-size:0.75rem;color:var(--muted);">Strategic thinking & quick decisions</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <span style="font-size:1.5rem;">📰</span>
+            <div>
+              <div style="font-size:0.9rem;">Current Affairs</div>
+              <div style="font-size:0.75rem;color:var(--muted);">Staying informed on markets & global events</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 Anubhav Soam &nbsp;·&nbsp; Built with precision &nbsp;·&nbsp; Finance meets Technology</p>
+  </footer>
+
+</div><!-- end portfolio tab -->
+
+<!-- =============== DCF TAB =============== -->
+<div id="dcf-tab" class="tab-content">
+<div id="dcf">
+  <div class="dcf-header">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+      <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:0.15em;">TOOL</span>
+      <div style="height:1px;width:50px;background:var(--border);"></div>
+    </div>
+    <h2>Automated DCF Valuation Model</h2>
+    <p>Multi-method valuation · Sensitivity Heatmap · Football Field Analysis · Built by Anubhav Soam</p>
+  </div>
+
+  <div class="dcf-layout">
+    <!-- INPUTS -->
+    <div class="dcf-inputs">
+      <div class="input-section-title">Company Overview</div>
+      <div class="input-row">
+        <label>Company Name</label>
+        <input type="text" id="companyName" value="Sample Corp" placeholder="e.g. Infosys">
+      </div>
+      <div class="input-row">
+        <label>Current Stock Price (₹)</label>
+        <input type="number" id="stockPrice" value="1500" step="10">
+      </div>
+      <div class="input-row">
+        <label>Shares Outstanding (Cr)</label>
+        <input type="number" id="shares" value="100" step="1">
+      </div>
+      <div class="input-row">
+        <label>Net Debt (₹ Cr)</label>
+        <input type="number" id="netDebt" value="500" step="50">
+      </div>
+
+      <div class="input-section-title">Base Financials (Year 0)</div>
+      <div class="input-row">
+        <label>Revenue (₹ Cr)</label>
+        <input type="number" id="revenue" value="5000" step="100">
+      </div>
+      <div class="input-row">
+        <label>EBITDA Margin (%)</label>
+        <input type="number" id="ebitdaMargin" value="22" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>Tax Rate (%)</label>
+        <input type="number" id="taxRate" value="25" step="1">
+      </div>
+      <div class="input-row">
+        <label>Capex % of Revenue</label>
+        <input type="number" id="capex" value="5" step="0.5">
+      </div>
+
+      <div class="input-section-title">Growth & Discount Assumptions</div>
+      <div class="input-row">
+        <label>Revenue Growth Yr 1–5 (%)</label>
+        <div class="range-container">
+          <input type="range" id="growthHigh" min="1" max="40" value="15" oninput="document.getElementById('growthHighVal').textContent=this.value+'%'">
+          <span class="range-val" id="growthHighVal">15%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>Revenue Growth Yr 6–10 (%)</label>
+        <div class="range-container">
+          <input type="range" id="growthLow" min="1" max="30" value="8" oninput="document.getElementById('growthLowVal').textContent=this.value+'%'">
+          <span class="range-val" id="growthLowVal">8%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>Terminal Growth Rate (%)</label>
+        <div class="range-container">
+          <input type="range" id="tgr" min="1" max="8" value="3" step="0.5" oninput="document.getElementById('tgrVal').textContent=this.value+'%'">
+          <span class="range-val" id="tgrVal">3%</span>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>WACC / Discount Rate (%)</label>
+        <div class="range-container">
+          <input type="range" id="wacc" min="6" max="20" value="12" step="0.5" oninput="document.getElementById('waccVal').textContent=this.value+'%'">
+          <span class="range-val" id="waccVal">12%</span>
+        </div>
+      </div>
+
+      <div class="input-section-title">Comparable Multiples</div>
+      <div class="input-row">
+        <label>Sector EV/EBITDA Multiple</label>
+        <input type="number" id="evEbitda" value="12" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>Sector P/E Multiple</label>
+        <input type="number" id="pe" value="20" step="0.5">
+      </div>
+      <div class="input-row">
+        <label>EPS (₹)</label>
+        <input type="number" id="eps" value="65" step="1">
+      </div>
+
+      <button class="run-btn" onclick="runDCF()">▶ Run Valuation</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="dcf-results" id="dcfResults">
+      <div class="dcf-placeholder" id="dcfPlaceholder">
+        <div class="icon">📊</div>
+        <h3>Enter assumptions and run the model</h3>
+        <p style="font-size:0.85rem;margin-top:0.5rem;">Outputs: DCF Intrinsic Value, Football Field Chart, Sensitivity Heatmap</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 Anubhav Soam &nbsp;·&nbsp; DCF Model &nbsp;·&nbsp; Finance meets Technology</p>
+</footer>
+</div><!-- end dcf tab -->
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  document.getElementById('nav-' + tab)?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Fix nav IDs
+document.getElementById('nav-portfolio').setAttribute('id','nav-portfolio');
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000) return '₹' + (n/1000).toFixed(1) + 'K Cr';
+  return '₹' + n.toFixed(1) + ' Cr';
+}
+
+function fmtP(n) { return n.toFixed(1) + '%'; }
+
+function runDCF() {
+  // Inputs
+  const company   = document.getElementById('companyName').value || 'Company';
+  const stockP    = parseFloat(document.getElementById('stockPrice').value);
+  const shares    = parseFloat(document.getElementById('shares').value);
+  const netDebt   = parseFloat(document.getElementById('netDebt').value);
+  const rev0      = parseFloat(document.getElementById('revenue').value);
+  const ebitdaMgn = parseFloat(document.getElementById('ebitdaMargin').value)/100;
+  const tax       = parseFloat(document.getElementById('taxRate').value)/100;
+  const capexPct  = parseFloat(document.getElementById('capex').value)/100;
+  const gHigh     = parseFloat(document.getElementById('growthHigh').value)/100;
+  const gLow      = parseFloat(document.getElementById('growthLow').value)/100;
+  const tgr       = parseFloat(document.getElementById('tgr').value)/100;
+  const wacc      = parseFloat(document.getElementById('wacc').value)/100;
+  const evEbitdaM = parseFloat(document.getElementById('evEbitda').value);
+  const peM       = parseFloat(document.getElementById('pe').value);
+  const eps       = parseFloat(document.getElementById('eps').value);
+
+  // Build projection rows
+  let rows = [];
+  let rev = rev0;
+  let totalPV = 0;
+
+  for (let yr = 1; yr <= 10; yr++) {
+    const g = yr <= 5 ? gHigh : gLow;
+    rev = rev * (1 + g);
+    const ebitda = rev * ebitdaMgn;
+    const nopat  = ebitda * (1 - tax);
+    const capexA = rev * capexPct;
+    const fcf    = nopat - capexA;
+    const df     = Math.pow(1 + wacc, yr);
+    const pvFcf  = fcf / df;
+    totalPV += pvFcf;
+    rows.push({ yr, rev, ebitda, fcf, pvFcf });
+  }
+
+  // Terminal value
+  const lastFCF = rows[9].fcf;
+  const tv      = lastFCF * (1 + tgr) / (wacc - tgr);
+  const pvTV    = tv / Math.pow(1 + wacc, 10);
+  const enterpriseValue = totalPV + pvTV;
+  const equityValue     = enterpriseValue - netDebt;
+  const intrinsic       = equityValue / shares;
+  const upside          = ((intrinsic - stockP) / stockP) * 100;
+
+  // EV/EBITDA & P/E
+  const ebitdaY5  = rows[4].ebitda;
+  const evByEbitda= ebitdaY5 * evEbitdaM;
+  const eqEV      = (evByEbitda - netDebt) / shares;
+  const peVal     = eps * peM;
+
+  // Render
+  const container = document.getElementById('dcfResults');
+  container.innerHTML = `
+    <div class="result-card">
+      <div class="result-card-title">Valuation Summary — ${company}</div>
+      <div class="valuation-summary">
+        <div class="val-metric">
+          <div class="val-metric-label">DCF Intrinsic Value</div>
+          <div class="val-metric-value">₹${intrinsic.toFixed(0)}</div>
+        </div>
+        <div class="val-metric">
+          <div class="val-metric-label">Current Price</div>
+          <div class="val-metric-value" style="color:var(--text);">₹${stockP.toFixed(0)}</div>
+        </div>
+        <div class="val-metric">
+          <div class="val-metric-label">Upside / Downside</div>
+          <div class="val-metric-value ${upside>=0?'positive':'negative'}">${upside>=0?'+':''}${upside.toFixed(1)}%</div>
+        </div>
+        <div class="val-metric">
+          <div class="val-metric-label">Enterprise Value</div>
+          <div class="val-metric-value" style="font-size:1.1rem;">${fmt(enterpriseValue)}</div>
+        </div>
+        <div class="val-metric">
+          <div class="val-metric-label">EV/EBITDA Value</div>
+          <div class="val-metric-value" style="font-size:1.1rem;">₹${eqEV.toFixed(0)}</div>
+        </div>
+        <div class="val-metric">
+          <div class="val-metric-label">P/E Value</div>
+          <div class="val-metric-value" style="font-size:1.1rem;">₹${peVal.toFixed(0)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">10-Year Free Cash Flow Projection</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Revenue (₹Cr)</th>
+            <th>EBITDA (₹Cr)</th>
+            <th>FCF (₹Cr)</th>
+            <th>PV of FCF (₹Cr)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>`
+            <tr ${r.yr===5||r.yr===10?'class="highlight"':''}>
+              <td>Year ${r.yr}</td>
+              <td>${r.rev.toFixed(0)}</td>
+              <td>${r.ebitda.toFixed(0)}</td>
+              <td>${r.fcf.toFixed(0)}</td>
+              <td>${r.pvFcf.toFixed(0)}</td>
+            </tr>
+          `).join('')}
+          <tr class="highlight">
+            <td>Terminal Value</td>
+            <td>—</td>
+            <td>—</td>
+            <td>${tv.toFixed(0)}</td>
+            <td>${pvTV.toFixed(0)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">Football Field Analysis</div>
+      <div class="football-field" id="ffChart">
+        ${buildFootballField(intrinsic, eqEV, peVal, stockP)}
+      </div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">Sensitivity Analysis — Intrinsic Value (₹) vs WACC & Terminal Growth</div>
+      ${buildHeatmap(rev0, ebitdaMgn, tax, capexPct, gHigh, gLow, netDebt, shares, wacc, tgr, stockP)}
+    </div>
+  `;
+}
+
+function buildFootballField(dcf, ev, pe, current) {
+  const values = [dcf, ev, pe, current];
+  const max = Math.max(...values) * 1.2;
+
+  const pct = v => Math.min((v/max)*100, 100);
+
+  return `
+    <div style="margin-bottom:1rem;font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace;">
+      All values in ₹ per share &nbsp;|&nbsp; ●Current Price: ₹${current.toFixed(0)}
+    </div>
+    <div class="ff-row">
+      <div class="ff-label">DCF Value</div>
+      <div class="ff-bar-container">
+        <div class="ff-bar dcf-bar" style="width:${pct(dcf)}%">₹${dcf.toFixed(0)}</div>
+      </div>
+    </div>
+    <div class="ff-row">
+      <div class="ff-label">EV/EBITDA</div>
+      <div class="ff-bar-container">
+        <div class="ff-bar ev-bar" style="width:${pct(ev)}%">₹${ev.toFixed(0)}</div>
+      </div>
+    </div>
+    <div class="ff-row">
+      <div class="ff-label">P/E Multiple</div>
+      <div class="ff-bar-container">
+        <div class="ff-bar pe-bar" style="width:${pct(pe)}%">₹${pe.toFixed(0)}</div>
+      </div>
+    </div>
+    <div class="ff-row">
+      <div class="ff-label">Current Price</div>
+      <div class="ff-bar-container">
+        <div class="ff-bar" style="width:${pct(current)}%;background:var(--border);color:var(--text);">₹${current.toFixed(0)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function buildHeatmap(rev0, ebitdaMgn, tax, capexPct, gHigh, gLow, netDebt, shares, baseWacc, baseTgr, stockP) {
+  const waccRange = [-0.02, -0.01, 0, 0.01, 0.02];
+  const tgrRange  = [-0.01, -0.005, 0, 0.005, 0.01];
+
+  function calcIntrinsic(w, t) {
+    let rev = rev0;
+    let totalPV = 0;
+    for (let yr = 1; yr <= 10; yr++) {
+      const g = yr <= 5 ? gHigh : gLow;
+      rev = rev * (1 + g);
+      const fcf = rev * ebitdaMgn * (1-tax) - rev * capexPct;
+      const pvFcf = fcf / Math.pow(1+w, yr);
+      totalPV += pvFcf;
+    }
+    const lastFCF = rev * ebitdaMgn * (1-tax) - rev * capexPct;
+    const tv = lastFCF * (1+t) / (w - t);
+    const pvTV = tv / Math.pow(1+w, 10);
+    return (totalPV + pvTV - netDebt) / shares;
+  }
+
+  const cells = [];
+  for (let i = 0; i < tgrRange.length; i++) {
+    for (let j = 0; j < waccRange.length; j++) {
+      cells.push(calcIntrinsic(baseWacc + waccRange[j], baseTgr + tgrRange[i]));
+    }
+  }
+
+  const minV = Math.min(...cells), maxV = Math.max(...cells);
+
+  function cellColor(v) {
+    const pct = (v - minV) / (maxV - minV);
+    if (pct > 0.7) return `hsl(160,60%,${25+pct*20}%)`;
+    if (pct > 0.4) return `hsl(45,70%,${30+pct*15}%)`;
+    return `hsl(0,55%,${25+pct*20}%)`;
+  }
+
+  let html = `
+    <div class="sensitivity-label">Rows: Terminal Growth Rate &nbsp;|&nbsp; Columns: WACC (base ± delta)</div>
+    <div class="heatmap-grid">
+      <div class="hm-header">TGR \\ WACC</div>
+      ${waccRange.map(w=>`<div class="hm-header">${((baseWacc+w)*100).toFixed(1)}%</div>`).join('')}
+  `;
+
+  for (let i = 0; i < tgrRange.length; i++) {
+    html += `<div class="hm-row-label">${((baseTgr+tgrRange[i])*100).toFixed(1)}%</div>`;
+    for (let j = 0; j < waccRange.length; j++) {
+      const v = cells[i*5+j];
+      const isBase = (waccRange[j]===0 && tgrRange[i]===0);
+      html += `<div class="hm-cell" style="background:${cellColor(v)};${isBase?'outline:2px solid var(--accent);':''}">${v.toFixed(0)}</div>`;
+    }
+  }
+
+  html += `</div>
+    <div style="margin-top:1rem;font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace;">
+      Green = Higher intrinsic value &nbsp;|&nbsp; Red = Lower intrinsic value &nbsp;|&nbsp; Outlined cell = Base case
+    </div>
+  `;
+
+  return html;
+}
+</script>
+</body>
+</html>
